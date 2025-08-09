@@ -13,7 +13,7 @@ const NEG_INFINITY: &str = "-inf";
 /// ## Example
 ///
 /// ```
-/// let mut buffer = ryu::Buffer::new();
+/// let mut buffer = ryuu::Buffer::new();
 /// let printed = buffer.format_finite(1.234);
 /// assert_eq!(printed, "1.234");
 /// ```
@@ -98,7 +98,7 @@ impl Default for Buffer {
 }
 
 /// A floating point number, f32 or f64, that can be written into a
-/// [`ryu::Buffer`][Buffer].
+/// [`ryuu::Buffer`][Buffer].
 ///
 /// This trait is sealed and cannot be implemented for types outside of the
 /// `ryu` crate.

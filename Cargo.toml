@@ -1,16 +1,19 @@
 [package]
-name = "ryu"
-version = "1.0.20"
-authors = ["David Tolnay <dtolnay@gmail.com>"]
+name = "ryuu"
+version = "2.0.0-alpha.0"
+edition = "2021"
+rust-version = "1.56.0"
+
+# === Publication info ===
+authors = ["David Tolnay <dtolnay@gmail.com>", "Hantong Chen <cxwdyx620@gmail.com>"]
 categories = ["value-formatting", "no-std", "no-std::no-alloc"]
 description = "Fast floating point to string conversion"
-documentation = "https://docs.rs/ryu"
-edition = "2018"
-exclude = ["build.rs", "performance.png", "chart/**"]
 keywords = ["float"]
+documentation = "https://docs.rs/ryuu"
 license = "Apache-2.0 OR BSL-1.0"
-repository = "https://github.com/dtolnay/ryu"
-rust-version = "1.36"
+repository = "https://github.com/hanyu-dev/ryuu"
+readme = "README.md"
+exclude = ["build.rs", "performance.png", "chart/**"]
 
 [features]
 # Use smaller lookup tables. Instead of storing every required power of
