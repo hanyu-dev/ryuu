@@ -1,5 +1,6 @@
-use crate::digit_table::DIGIT_TABLE;
 use core::ptr;
+
+use crate::digit_table::DIGIT_TABLE;
 
 #[cfg_attr(feature = "no-panic", inline)]
 pub unsafe fn write_mantissa_long(mut output: u64, mut result: *mut u8) {

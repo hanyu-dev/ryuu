@@ -1,10 +1,9 @@
 #![cfg_attr(not(check_cfg), allow(unexpected_cfgs))]
 #![allow(clippy::cast_possible_truncation)]
 
-use std::str;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::thread;
+use std::{str, thread};
 
 #[test]
 #[cfg_attr(not(exhaustive), ignore = "requires cfg(exhaustive)")]

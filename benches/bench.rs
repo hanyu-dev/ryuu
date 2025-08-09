@@ -1,16 +1,13 @@
 // cargo bench
 
 #![feature(test)]
-#![allow(
-    clippy::approx_constant,
-    clippy::excessive_precision,
-    clippy::unreadable_literal
-)]
+#![allow(clippy::approx_constant, clippy::excessive_precision, clippy::unreadable_literal)]
 
 extern crate test;
 
 use std::io::Write;
 use std::{f32, f64};
+
 use test::{black_box, Bencher};
 
 macro_rules! benches {

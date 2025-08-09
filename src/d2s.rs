@@ -18,15 +18,14 @@
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.
 
+use core::mem::MaybeUninit;
+
 use crate::common::{log10_pow2, log10_pow5, pow5bits};
 #[cfg(not(feature = "small"))]
 pub use crate::d2s_full_table::{DOUBLE_POW5_INV_SPLIT, DOUBLE_POW5_SPLIT};
-use crate::d2s_intrinsics::{
-    div10, div100, div5, mul_shift_all_64, multiple_of_power_of_2, multiple_of_power_of_5,
-};
+use crate::d2s_intrinsics::{div10, div100, div5, mul_shift_all_64, multiple_of_power_of_2, multiple_of_power_of_5};
 #[cfg(feature = "small")]
 pub use crate::d2s_small_table::{compute_inv_pow5, compute_pow5};
-use core::mem::MaybeUninit;
 
 pub const DOUBLE_MANTISSA_BITS: u32 = 52;
 pub const DOUBLE_EXPONENT_BITS: u32 = 11;
@@ -209,7 +208,8 @@ pub fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
         }
     }
 
-    // Step 4: Find the shortest decimal representation in the interval of valid representations.
+    // Step 4: Find the shortest decimal representation in the interval of valid
+    // representations.
     let mut removed = 0i32;
     let mut last_removed_digit = 0u8;
     // On average, we remove ~2 digits.
@@ -255,10 +255,10 @@ pub fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
             last_removed_digit = 4;
         }
         // We need to take vr + 1 if vr is outside bounds or we need to round up.
-        vr + ((vr == vm && (!accept_bounds || !vm_is_trailing_zeros)) || last_removed_digit >= 5)
-            as u64
+        vr + ((vr == vm && (!accept_bounds || !vm_is_trailing_zeros)) || last_removed_digit >= 5) as u64
     } else {
-        // Specialized for the common case (~99.3%). Percentages below are relative to this.
+        // Specialized for the common case (~99.3%). Percentages below are relative to
+        // this.
         let mut round_up = false;
         let vp_div100 = div100(vp);
         let vm_div100 = div100(vm);

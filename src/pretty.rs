@@ -1,14 +1,16 @@
 mod exponent;
 mod mantissa;
 
+use core::ptr;
+
+#[cfg(feature = "no-panic")]
+use no_panic::no_panic;
+
 use self::exponent::{write_exponent2, write_exponent3};
 use self::mantissa::{write_mantissa, write_mantissa_long};
 use crate::common;
 use crate::d2s::{self, d2d, DOUBLE_EXPONENT_BITS, DOUBLE_MANTISSA_BITS};
 use crate::f2s::{f2d, FLOAT_EXPONENT_BITS, FLOAT_MANTISSA_BITS};
-use core::ptr;
-#[cfg(feature = "no-panic")]
-use no_panic::no_panic;
 
 /// Print f64 to the given buffer and return number of bytes written.
 ///
@@ -35,7 +37,8 @@ use no_panic::no_panic;
 /// ## Example
 ///
 /// ```
-/// use std::{mem::MaybeUninit, slice, str};
+/// use std::mem::MaybeUninit;
+/// use std::{slice, str};
 ///
 /// let f = 1.234f64;
 ///
@@ -53,8 +56,7 @@ pub unsafe fn format64(f: f64, result: *mut u8) -> usize {
     let bits = f.to_bits();
     let sign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1) != 0;
     let ieee_mantissa = bits & ((1u64 << DOUBLE_MANTISSA_BITS) - 1);
-    let ieee_exponent =
-        (bits >> DOUBLE_MANTISSA_BITS) as u32 & ((1u32 << DOUBLE_EXPONENT_BITS) - 1);
+    let ieee_exponent = (bits >> DOUBLE_MANTISSA_BITS) as u32 & ((1u32 << DOUBLE_EXPONENT_BITS) - 1);
 
     let mut index = 0isize;
     if sign {
@@ -110,10 +112,7 @@ pub unsafe fn format64(f: f64, result: *mut u8) -> usize {
         *result.offset(index) = *result.offset(index + 1);
         *result.offset(index + 1) = b'.';
         *result.offset(index + length + 1) = b'e';
-        index as usize
-            + length as usize
-            + 2
-            + write_exponent3(kk - 1, result.offset(index + length + 2))
+        index as usize + length as usize + 2 + write_exponent3(kk - 1, result.offset(index + length + 2))
     }
 }
 
@@ -142,7 +141,8 @@ pub unsafe fn format64(f: f64, result: *mut u8) -> usize {
 /// ## Example
 ///
 /// ```
-/// use std::{mem::MaybeUninit, slice, str};
+/// use std::mem::MaybeUninit;
+/// use std::{slice, str};
 ///
 /// let f = 1.234f32;
 ///
@@ -216,9 +216,6 @@ pub unsafe fn format32(f: f32, result: *mut u8) -> usize {
         *result.offset(index) = *result.offset(index + 1);
         *result.offset(index + 1) = b'.';
         *result.offset(index + length + 1) = b'e';
-        index as usize
-            + length as usize
-            + 2
-            + write_exponent2(kk - 1, result.offset(index + length + 2))
+        index as usize + length as usize + 2 + write_exponent2(kk - 1, result.offset(index + length + 2))
     }
 }

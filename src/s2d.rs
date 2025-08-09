@@ -1,9 +1,10 @@
+#[cfg(feature = "no-panic")]
+use no_panic::no_panic;
+
 use crate::common::{ceil_log2_pow5, log2_pow5};
 use crate::d2s;
 use crate::d2s_intrinsics::{mul_shift_64, multiple_of_power_of_2, multiple_of_power_of_5};
 use crate::parse::Error;
-#[cfg(feature = "no-panic")]
-use no_panic::no_panic;
 
 const DOUBLE_EXPONENT_BIAS: usize = 1023;
 
@@ -117,7 +118,8 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
     let mut trailing_zeros: bool;
     if e10 >= 0 {
         // The length of m * 10^e in bits is:
-        //   log2(m10 * 10^e10) = log2(m10) + e10 log2(10) = log2(m10) + e10 + e10 * log2(5)
+        //   log2(m10 * 10^e10) = log2(m10) + e10 log2(10) = log2(m10) + e10 + e10 *
+        // log2(5)
         //
         // We want to compute the DOUBLE_MANTISSA_BITS + 1 top-most bits (+1 for
         // the implicit leading one in IEEE format). We therefore choose a
@@ -151,8 +153,7 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
         // requires that the largest power of 2 that divides m10 + e10 is
         // greater than e2. If e2 is less than e10, then the result must be
         // exact. Otherwise we use the existing multiple_of_power_of_2 function.
-        trailing_zeros =
-            e2 < e10 || e2 - e10 < 64 && multiple_of_power_of_2(m10, (e2 - e10) as u32);
+        trailing_zeros = e2 < e10 || e2 - e10 < 64 && multiple_of_power_of_2(m10, (e2 - e10) as u32);
     } else {
         e2 = floor_log2(m10)
             .wrapping_add(e10 as u32)
@@ -176,7 +177,8 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
     let mut ieee_e2 = i32::max(0, e2 + DOUBLE_EXPONENT_BIAS as i32 + floor_log2(m2) as i32) as u32;
 
     if ieee_e2 > 0x7fe {
-        // Final IEEE exponent is larger than the maximum representable; return +/-Infinity.
+        // Final IEEE exponent is larger than the maximum representable; return
+        // +/-Infinity.
         let ieee = ((signed_m as u64) << (d2s::DOUBLE_EXPONENT_BITS + d2s::DOUBLE_MANTISSA_BITS))
             | (0x7ff_u64 << d2s::DOUBLE_MANTISSA_BITS);
         return Ok(f64::from_bits(ieee));
@@ -210,8 +212,7 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
         // for overflow here.
         ieee_e2 += 1;
     }
-    let ieee = ((((signed_m as u64) << d2s::DOUBLE_EXPONENT_BITS) | ieee_e2 as u64)
-        << d2s::DOUBLE_MANTISSA_BITS)
-        | ieee_m2;
+    let ieee =
+        ((((signed_m as u64) << d2s::DOUBLE_EXPONENT_BITS) | ieee_e2 as u64) << d2s::DOUBLE_MANTISSA_BITS) | ieee_m2;
     Ok(f64::from_bits(ieee))
 }

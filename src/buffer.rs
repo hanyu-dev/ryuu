@@ -1,8 +1,10 @@
-use crate::raw;
 use core::mem::MaybeUninit;
 use core::{slice, str};
+
 #[cfg(feature = "no-panic")]
 use no_panic::no_panic;
+
+use crate::raw;
 
 const NAN: &str = "NaN";
 const INFINITY: &str = "inf";

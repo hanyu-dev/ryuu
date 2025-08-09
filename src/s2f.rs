@@ -1,11 +1,12 @@
+#[cfg(feature = "no-panic")]
+use no_panic::no_panic;
+
 use crate::common::{ceil_log2_pow5, log2_pow5};
 use crate::f2s;
 use crate::f2s_intrinsics::{
     mul_pow5_div_pow2, mul_pow5_inv_div_pow2, multiple_of_power_of_2_32, multiple_of_power_of_5_32,
 };
 use crate::parse::Error;
-#[cfg(feature = "no-panic")]
-use no_panic::no_panic;
 
 const FLOAT_EXPONENT_BIAS: usize = 127;
 
@@ -119,7 +120,8 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
     let mut trailing_zeros: bool;
     if e10 >= 0 {
         // The length of m * 10^e in bits is:
-        //   log2(m10 * 10^e10) = log2(m10) + e10 log2(10) = log2(m10) + e10 + e10 * log2(5)
+        //   log2(m10 * 10^e10) = log2(m10) + e10 log2(10) = log2(m10) + e10 + e10 *
+        // log2(5)
         //
         // We want to compute the FLOAT_MANTISSA_BITS + 1 top-most bits (+1 for
         // the implicit leading one in IEEE format). We therefore choose a
@@ -148,8 +150,7 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
         // requires that the largest power of 2 that divides m10 + e10 is
         // greater than e2. If e2 is less than e10, then the result must be
         // exact. Otherwise we use the existing multiple_of_power_of_2 function.
-        trailing_zeros =
-            e2 < e10 || e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32);
+        trailing_zeros = e2 < e10 || e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32);
     } else {
         e2 = floor_log2(m10)
             .wrapping_add(e10 as u32)
@@ -175,8 +176,7 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
         // 5^(-e10)] above, and we need to check whether 5^(-e10) divides (m10 *
         // 2^(e10-e2)), which is the case iff pow5(m10 * 2^(e10-e2)) = pow5(m10)
         // >= -e10.
-        trailing_zeros = (e2 < e10
-            || (e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32)))
+        trailing_zeros = (e2 < e10 || (e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32)))
             && multiple_of_power_of_5_32(m10, -e10 as u32);
     }
 
@@ -222,8 +222,6 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
         // for overflow here.
         ieee_e2 += 1;
     }
-    let ieee = ((((signed_m as u32) << f2s::FLOAT_EXPONENT_BITS) | ieee_e2)
-        << f2s::FLOAT_MANTISSA_BITS)
-        | ieee_m2;
+    let ieee = ((((signed_m as u32) << f2s::FLOAT_EXPONENT_BITS) | ieee_e2) << f2s::FLOAT_MANTISSA_BITS) | ieee_m2;
     Ok(f32::from_bits(ieee))
 }
