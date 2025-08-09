@@ -1,9 +1,11 @@
-# Ryū
+# Ryūū
 
-[<img alt="github" src="https://img.shields.io/badge/github-dtolnay/ryu-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/dtolnay/ryu)
-[<img alt="crates.io" src="https://img.shields.io/crates/v/ryu.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/ryu)
-[<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-ryu-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/ryu)
-[<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/dtolnay/ryu/ci.yml?branch=master&style=for-the-badge" height="20">](https://github.com/dtolnay/ryu/actions?query=branch%3Amaster)
+[<img alt="github" src="https://img.shields.io/badge/github-hanyu%20dev/ryuu-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/hanyu-dev/ryuu)
+[<img alt="crates.io" src="https://img.shields.io/crates/v/ryuu.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/ryuu)
+[<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-ryuu-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/ryuu)
+[<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/hanyu-dev/ryuu/ci.yml?branch=master&style=for-the-badge" height="20">](https://github.com/hanyu-dev/ryuu/actions?query=branch%3Amaster)
+
+This is a **fork** of the [ryu](https://crates.io/crates/ryu) crate.
 
 Pure Rust implementation of Ryū, an algorithm to quickly convert floating point
 numbers to decimal strings.
@@ -23,7 +25,7 @@ uses nothing from the Rust standard library so is usable from no_std crates.*
 
 ```toml
 [dependencies]
-ryu = "1.0"
+ryuu = "1.0"
 ```
 
 <br>
@@ -32,7 +34,7 @@ ryu = "1.0"
 
 ```rust
 fn main() {
-    let mut buffer = ryu::Buffer::new();
+    let mut buffer = ryuu::Buffer::new();
     let printed = buffer.format(1.234);
     assert_eq!(printed, "1.234");
 }
@@ -42,7 +44,7 @@ fn main() {
 
 ## Performance (lower is better)
 
-![performance](https://raw.githubusercontent.com/dtolnay/ryu/master/performance.png)
+![performance](https://raw.githubusercontent.com/hanyu-dev/ryuu/master/performance.png)
 
 You can run upstream's benchmarks with:
 
@@ -55,8 +57,8 @@ $ bazel run -c opt //ryu/benchmark:ryu_benchmark
 And the same benchmark against our implementation with:
 
 ```console
-$ git clone https://github.com/dtolnay/ryu rust-ryu
-$ cd rust-ryu
+$ git clone https://github.com/hanyu-dev/ryuu rust-ryuu
+$ cd rust-ryuu
 $ cargo run --example upstream_benchmark --release
 ```
 
@@ -85,8 +87,8 @@ This library tends to produce more human-readable output than the standard
 library's to\_string, which never uses scientific notation. Here are two
 examples:
 
-- *ryu:* 1.23e40, *std:* 12300000000000000000000000000000000000000
-- *ryu:* 1.23e-40, *std:* 0.000000000000000000000000000000000000000123
+- *ryuu:* 1.23e40, *std:* 12300000000000000000000000000000000000000
+- *ryuu:* 1.23e-40, *std:* 0.000000000000000000000000000000000000000123
 
 Both libraries print short decimals such as 0.0000123 without scientific
 notation.

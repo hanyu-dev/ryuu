@@ -20,7 +20,7 @@ macro_rules! benches {
             $(
                 #[bench]
                 fn $name(b: &mut Bencher) {
-                    let mut buf = ryu::Buffer::new();
+                    let mut buf = ryuu::Buffer::new();
 
                     b.iter(move || {
                         let value = black_box($value);
