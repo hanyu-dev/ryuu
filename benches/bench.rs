@@ -1,59 +1,90 @@
-// cargo bench
-
-#![feature(test)]
-#![allow(clippy::approx_constant, clippy::excessive_precision, clippy::unreadable_literal)]
-
-extern crate test;
-
-use std::io::Write;
+use std::hint::black_box;
 use std::{f32, f64};
 
-use test::{black_box, Bencher};
+use criterion::{criterion_group, criterion_main, Criterion};
 
-macro_rules! benches {
-    ($($name:ident($value:expr),)*) => {
-        mod bench_ryu {
-            use super::*;
-            $(
-                #[bench]
-                fn $name(b: &mut Bencher) {
-                    let mut buf = ryuu::Buffer::new();
+// Test values for benchmarking
+const F64_VALUES: &[f64] = &[
+    0.0,
+    0.1234,
+    2.718281828459045, // e
+    3.141592653589793, // pi
+    1.23e40,
+    1.23e-40,
+    f64::MAX,
+    f64::MIN,
+    123.456789,
+    -123.456789,
+];
 
-                    b.iter(move || {
-                        let value = black_box($value);
-                        let formatted = buf.format_finite(value);
-                        black_box(formatted);
-                    });
-                }
-            )*
-        }
+const F32_VALUES: &[f32] = &[
+    0.0,
+    0.1234,
+    2.718281828459045, // e
+    3.141592653589793, // pi
+    1.23e20,
+    1.23e-20,
+    f32::MAX,
+    f32::MIN,
+    123.456789,
+    -123.456789,
+];
 
-        mod bench_std_fmt {
-            use super::*;
-            $(
-                #[bench]
-                fn $name(b: &mut Bencher) {
-                    let mut buf = Vec::with_capacity(20);
+fn bench_f64(c: &mut Criterion) {
+    let mut group = c.benchmark_group("f64");
 
-                    b.iter(|| {
-                        buf.clear();
-                        let value = black_box($value);
-                        write!(&mut buf, "{}", value).unwrap();
-                        black_box(buf.as_slice());
-                    });
-                }
-            )*
-        }
-    };
+    for &value in F64_VALUES {
+        group.bench_function(format!("ryu/{value}"), |b| {
+            b.iter(|| {
+                let mut buf = ryu::Buffer::new();
+                let string = buf.format(black_box(value));
+                black_box(string);
+            });
+        });
+
+        group.bench_function(format!("ryuu/{value}"), |b| {
+            b.iter(|| {
+                let mut buf = ryuu::Buffer::new();
+                let string = buf.format(black_box(value));
+                black_box(string);
+            });
+        });
+
+        group.bench_function(format!("std/{value}"), |b| {
+            b.iter(|| format!("{value}"));
+        });
+    }
+
+    group.finish();
 }
 
-benches! {
-    bench_0_f64(0f64),
-    bench_short_f64(0.1234f64),
-    bench_e_f64(2.718281828459045f64),
-    bench_max_f64(f64::MAX),
-    bench_0_f32(0f32),
-    bench_short_f32(0.1234f32),
-    bench_e_f32(2.718281828459045f32),
-    bench_max_f32(f32::MAX),
+fn bench_f32(c: &mut Criterion) {
+    let mut group = c.benchmark_group("f32");
+
+    for &value in F32_VALUES {
+        group.bench_function(format!("ryu/{value}"), |b| {
+            b.iter(|| {
+                let mut buf = ryu::Buffer::new();
+                let string = buf.format(black_box(value));
+                black_box(string);
+            });
+        });
+
+        group.bench_function(format!("ryuu/{value}"), |b| {
+            b.iter(|| {
+                let mut buf = ryuu::Buffer::new();
+                let string = buf.format(black_box(value));
+                black_box(string);
+            });
+        });
+
+        group.bench_function(format!("std/{value}"), |b| {
+            b.iter(|| format!("{value}"));
+        });
+    }
+
+    group.finish();
 }
+
+criterion_group!(benches, bench_f64, bench_f32);
+criterion_main!(benches);

@@ -18,20 +18,7 @@
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.
 
-#![allow(dead_code)]
-#![allow(
-    clippy::approx_constant,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss,
-    clippy::excessive_precision,
-    clippy::unreadable_literal,
-    clippy::wildcard_imports
-)]
-
-#[path = "../src/common.rs"]
-mod common;
-
-use common::{ceil_log2_pow5, decimal_length9, log10_pow2, log10_pow5};
+use crate::common::{ceil_log2_pow5, decimal_length9, log10_pow2, log10_pow5};
 
 #[test]
 fn test_decimal_length9() {

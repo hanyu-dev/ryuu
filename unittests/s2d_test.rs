@@ -18,54 +18,7 @@
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.
 
-#![cfg(not(feature = "small"))]
-#![allow(dead_code)]
-#![allow(
-    clippy::cast_lossless,
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss,
-    clippy::excessive_precision,
-    clippy::float_cmp,
-    clippy::manual_range_contains,
-    clippy::similar_names,
-    clippy::too_many_lines,
-    clippy::unreadable_literal,
-    clippy::unseparated_literal_suffix,
-    clippy::wildcard_imports
-)]
-
-#[path = "../src/common.rs"]
-mod common;
-
-#[cfg(not(feature = "small"))]
-#[path = "../src/d2s_full_table.rs"]
-mod d2s_full_table;
-
-#[path = "../src/d2s_intrinsics.rs"]
-mod d2s_intrinsics;
-
-#[cfg(feature = "small")]
-#[path = "../src/d2s_small_table.rs"]
-mod d2s_small_table;
-
-#[path = "../src/d2s.rs"]
-mod d2s;
-
-#[path = "../src/s2d.rs"]
-mod s2d;
-
-#[path = "../src/parse.rs"]
-mod parse;
-
-use crate::parse::Error;
-use crate::s2d::s2d;
-
-impl PartialEq for Error {
-    fn eq(&self, other: &Self) -> bool {
-        *self as u8 == *other as u8
-    }
-}
+use crate::parse::{s2d, Error};
 
 #[test]
 fn test_bad_input() {
@@ -140,13 +93,13 @@ fn test_table_size_denormal() {
 
 #[test]
 fn test_issue157() {
-    assert_eq!(1.2999999999999999E+154, s2d(b"1.2999999999999999E+154").unwrap(),);
+    assert_eq!(1.2999999999999999E+154, s2d(b"1.2999999999999999E+154").unwrap());
 }
 
 #[test]
 fn test_issue173() {
     // Denormal boundary
-    assert_eq!(2.2250738585072012e-308, s2d(b"2.2250738585072012e-308").unwrap(),);
-    assert_eq!(2.2250738585072013e-308, s2d(b"2.2250738585072013e-308").unwrap(),);
-    assert_eq!(2.2250738585072014e-308, s2d(b"2.2250738585072014e-308").unwrap(),);
+    assert_eq!(2.2250738585072012e-308, s2d(b"2.2250738585072012e-308").unwrap());
+    assert_eq!(2.2250738585072013e-308, s2d(b"2.2250738585072013e-308").unwrap());
+    assert_eq!(2.2250738585072014e-308, s2d(b"2.2250738585072014e-308").unwrap());
 }

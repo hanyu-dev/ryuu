@@ -18,59 +18,7 @@
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.
 
-#![allow(dead_code)]
-#![allow(
-    clippy::cast_lossless,
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss,
-    clippy::checked_conversions,
-    clippy::float_cmp,
-    clippy::manual_range_contains,
-    clippy::similar_names,
-    clippy::too_many_lines,
-    clippy::unreadable_literal,
-    clippy::unseparated_literal_suffix,
-    clippy::wildcard_imports
-)]
-
-#[path = "../src/common.rs"]
-mod common;
-
-#[cfg(not(feature = "small"))]
-#[path = "../src/d2s_full_table.rs"]
-mod d2s_full_table;
-
-#[path = "../src/d2s_intrinsics.rs"]
-mod d2s_intrinsics;
-
-#[cfg(feature = "small")]
-#[path = "../src/d2s_small_table.rs"]
-mod d2s_small_table;
-
-#[path = "../src/d2s.rs"]
-mod d2s;
-
-#[path = "../src/f2s_intrinsics.rs"]
-mod f2s_intrinsics;
-
-#[path = "../src/f2s.rs"]
-mod f2s;
-
-#[path = "../src/s2f.rs"]
-mod s2f;
-
-#[path = "../src/parse.rs"]
-mod parse;
-
-use crate::parse::Error;
-use crate::s2f::s2f;
-
-impl PartialEq for Error {
-    fn eq(&self, other: &Self) -> bool {
-        *self as u8 == *other as u8
-    }
-}
+use crate::parse::*;
 
 #[test]
 fn test_basic() {

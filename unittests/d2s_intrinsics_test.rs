@@ -18,13 +18,7 @@
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.
 
-#![allow(dead_code)]
-#![allow(clippy::cast_lossless, clippy::cast_possible_truncation, clippy::unreadable_literal)]
-
-#[path = "../src/d2s_intrinsics.rs"]
-mod d2s_intrinsics;
-
-use d2s_intrinsics::pow5_factor;
+use crate::d2s_intrinsics::pow5_factor;
 
 #[test]
 fn test_pow5_factor() {
