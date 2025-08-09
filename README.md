@@ -5,7 +5,9 @@
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-ryuu-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/ryuu)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/hanyu-dev/ryuu/ci.yml?branch=master&style=for-the-badge" height="20">](https://github.com/hanyu-dev/ryuu/actions?query=branch%3Amaster)
 
-This is a **fork** of the [ryu](https://crates.io/crates/ryu) crate.
+This is a **fork** of the [ryu](https://crates.io/crates/ryu) crate:
+
+- Make this crate const ready (in fact, the compiled asm is the same as `ryu`), requiring Rust 1.83.
 
 Pure Rust implementation of Ryū, an algorithm to quickly convert floating point
 numbers to decimal strings.

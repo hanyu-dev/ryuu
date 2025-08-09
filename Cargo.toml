@@ -2,7 +2,7 @@
 name = "ryuu"
 version = "2.0.0-alpha.0"
 edition = "2021"
-rust-version = "1.56.0"
+rust-version = "1.83.0"
 
 # === Publication info ===
 authors = ["David Tolnay <dtolnay@gmail.com>", "Hantong Chen <cxwdyx620@gmail.com>"]
@@ -22,13 +22,18 @@ exclude = ["build.rs", "performance.png", "chart/**"]
 # one case, and only f64) at the cost of some performance.
 small = []
 
+# Experimental parsing function.
+feat-exp-parse = []
+
 [dependencies]
-no-panic = { version = "0.1", optional = true }
+const_for = "0.1.5"
 
 [dev-dependencies]
+criterion = "0.7.0"
 num_cpus = "1.8"
 rand = "0.9"
 rand_xorshift = "0.4"
+ryu = "1.0.20"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -39,3 +44,11 @@ rustdoc-args = [
     "--extern-html-root-url=alloc=https://doc.rust-lang.org",
     "--extern-html-root-url=std=https://doc.rust-lang.org",
 ]
+
+[[bench]]
+name = "bench"
+harness = false
+
+[profile.bench]
+lto = true
+codegen-units = 1

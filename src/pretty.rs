@@ -3,8 +3,7 @@ mod mantissa;
 
 use core::ptr;
 
-#[cfg(feature = "no-panic")]
-use no_panic::no_panic;
+use const_for::const_for;
 
 use self::exponent::{write_exponent2, write_exponent3};
 use self::mantissa::{write_mantissa, write_mantissa_long};
@@ -51,8 +50,7 @@ use crate::f2s::{f2d, FLOAT_EXPONENT_BITS, FLOAT_MANTISSA_BITS};
 /// }
 /// ```
 #[must_use]
-#[cfg_attr(feature = "no-panic", no_panic)]
-pub unsafe fn format64(f: f64, result: *mut u8) -> usize {
+pub const unsafe fn format64(f: f64, result: *mut u8) -> usize {
     let bits = f.to_bits();
     let sign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1) != 0;
     let ieee_mantissa = bits & ((1u64 << DOUBLE_MANTISSA_BITS) - 1);
@@ -79,9 +77,9 @@ pub unsafe fn format64(f: f64, result: *mut u8) -> usize {
     if 0 <= k && kk <= 16 {
         // 1234e7 -> 12340000000.0
         write_mantissa_long(v.mantissa, result.offset(index + length));
-        for i in length..kk {
+        const_for!(i in length..kk => {
             *result.offset(index + i) = b'0';
-        }
+        });
         *result.offset(index + kk) = b'.';
         *result.offset(index + kk + 1) = b'0';
         index as usize + kk as usize + 2
@@ -96,9 +94,9 @@ pub unsafe fn format64(f: f64, result: *mut u8) -> usize {
         *result.offset(index) = b'0';
         *result.offset(index + 1) = b'.';
         let offset = 2 - kk;
-        for i in 2..offset {
+        const_for!(i in 2..offset => {
             *result.offset(index + i) = b'0';
-        }
+        });
         write_mantissa_long(v.mantissa, result.offset(index + length + offset));
         index as usize + length as usize + offset as usize
     } else if length == 1 {
@@ -155,8 +153,7 @@ pub unsafe fn format64(f: f64, result: *mut u8) -> usize {
 /// }
 /// ```
 #[must_use]
-#[cfg_attr(feature = "no-panic", no_panic)]
-pub unsafe fn format32(f: f32, result: *mut u8) -> usize {
+pub const unsafe fn format32(f: f32, result: *mut u8) -> usize {
     let bits = f.to_bits();
     let sign = ((bits >> (FLOAT_MANTISSA_BITS + FLOAT_EXPONENT_BITS)) & 1) != 0;
     let ieee_mantissa = bits & ((1u32 << FLOAT_MANTISSA_BITS) - 1);
@@ -183,9 +180,9 @@ pub unsafe fn format32(f: f32, result: *mut u8) -> usize {
     if 0 <= k && kk <= 13 {
         // 1234e7 -> 12340000000.0
         write_mantissa(v.mantissa, result.offset(index + length));
-        for i in length..kk {
+        const_for!(i in length..kk => {
             *result.offset(index + i) = b'0';
-        }
+        });
         *result.offset(index + kk) = b'.';
         *result.offset(index + kk + 1) = b'0';
         index as usize + kk as usize + 2
@@ -200,9 +197,9 @@ pub unsafe fn format32(f: f32, result: *mut u8) -> usize {
         *result.offset(index) = b'0';
         *result.offset(index + 1) = b'.';
         let offset = 2 - kk;
-        for i in 2..offset {
+        const_for!(i in 2..offset => {
             *result.offset(index + i) = b'0';
-        }
+        });
         write_mantissa(v.mantissa, result.offset(index + length + offset));
         index as usize + length as usize + offset as usize
     } else if length == 1 {

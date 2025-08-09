@@ -106,14 +106,16 @@
 mod buffer;
 mod common;
 mod d2s;
-#[cfg(not(feature = "small"))]
+#[cfg(any(not(feature = "small"), feature = "feat-exp-parse"))]
 mod d2s_full_table;
 mod d2s_intrinsics;
-#[cfg(feature = "small")]
+#[cfg(any(test, feature = "small", feature = "feat-exp-parse"))]
 mod d2s_small_table;
 mod digit_table;
 mod f2s;
 mod f2s_intrinsics;
+#[cfg(any(test, feature = "feat-exp-parse"))]
+pub mod parse;
 mod pretty;
 
 pub use crate::buffer::{Buffer, Float};
@@ -121,4 +123,17 @@ pub use crate::buffer::{Buffer, Float};
 /// Unsafe functions that mirror the API of the C implementation of Ryū.
 pub mod raw {
     pub use crate::pretty::{format32, format64};
+}
+
+pub fn t(f: f64) {
+    let mut data = Buffer::new();
+
+    let data = data.format(f);
+
+    core::hint::black_box(data);
+}
+
+#[test]
+fn tt() {
+    t(0.0);
 }

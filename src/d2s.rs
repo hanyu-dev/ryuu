@@ -21,7 +21,7 @@
 use core::mem::MaybeUninit;
 
 use crate::common::{log10_pow2, log10_pow5, pow5bits};
-#[cfg(not(feature = "small"))]
+#[cfg(any(not(feature = "small"), feature = "feat-exp-parse"))]
 pub use crate::d2s_full_table::{DOUBLE_POW5_INV_SPLIT, DOUBLE_POW5_SPLIT};
 use crate::d2s_intrinsics::{div10, div100, div5, mul_shift_all_64, multiple_of_power_of_2, multiple_of_power_of_5};
 #[cfg(feature = "small")]
@@ -33,8 +33,8 @@ pub const DOUBLE_BIAS: i32 = 1023;
 pub const DOUBLE_POW5_INV_BITCOUNT: i32 = 125;
 pub const DOUBLE_POW5_BITCOUNT: i32 = 125;
 
-#[cfg_attr(feature = "no-panic", inline)]
-pub fn decimal_length17(v: u64) -> u32 {
+#[inline]
+pub const fn decimal_length17(v: u64) -> u32 {
     // This is slightly faster than a loop.
     // The average output length is 16.38 digits, so we check high-to-low.
     // Function precondition: v is not an 18, 19, or 20-digit number.
@@ -86,8 +86,8 @@ pub struct FloatingDecimal64 {
     pub exponent: i32,
 }
 
-#[cfg_attr(feature = "no-panic", inline)]
-pub fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
+#[inline]
+pub const fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
     let (e2, m2) = if ieee_exponent == 0 {
         (
             // We subtract 2 so that the bounds computation has 2 additional bits.
@@ -135,7 +135,7 @@ pub fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
                 #[cfg(not(feature = "small"))]
                 {
                     debug_assert!(q < DOUBLE_POW5_INV_SPLIT.len() as u32);
-                    DOUBLE_POW5_INV_SPLIT.get_unchecked(q as usize)
+                    &DOUBLE_POW5_INV_SPLIT[q as usize]
                 },
                 i as u32,
                 vp_uninit.as_mut_ptr(),
@@ -177,7 +177,7 @@ pub fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
                 #[cfg(not(feature = "small"))]
                 {
                     debug_assert!(i < DOUBLE_POW5_SPLIT.len() as i32);
-                    DOUBLE_POW5_SPLIT.get_unchecked(i as usize)
+                    &DOUBLE_POW5_SPLIT[i as usize]
                 },
                 j as u32,
                 vp_uninit.as_mut_ptr(),
@@ -298,5 +298,16 @@ pub fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
     FloatingDecimal64 {
         exponent: exp,
         mantissa: output,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    mod d2s_table_test {
+        include!("../unittests/d2s_table_test.rs");
+    }
+
+    mod d2s_intrinsics_test {
+        include!("../unittests/d2s_intrinsics_test.rs");
     }
 }
