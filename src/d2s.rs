@@ -21,7 +21,7 @@
 use core::mem::MaybeUninit;
 
 use crate::common::{log10_pow2, log10_pow5, pow5bits};
-#[cfg(any(not(feature = "small"), feature = "feat-exp-parse"))]
+#[cfg(any(test, not(feature = "small"), feature = "feat-exp-parse"))]
 pub use crate::d2s_full_table::{DOUBLE_POW5_INV_SPLIT, DOUBLE_POW5_SPLIT};
 use crate::d2s_intrinsics::{div10, div100, div5, mul_shift_all_64, multiple_of_power_of_2, multiple_of_power_of_5};
 #[cfg(feature = "small")]
@@ -304,10 +304,22 @@ pub const fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
 #[cfg(test)]
 mod tests {
     mod d2s_table_test {
+        #![allow(
+            clippy::cast_lossless,
+            clippy::cast_possible_truncation,
+            clippy::cast_possible_wrap,
+            clippy::cast_sign_loss,
+            clippy::unreadable_literal,
+            clippy::unseparated_literal_suffix,
+            clippy::wildcard_imports
+        )]
+
         include!("../unittests/d2s_table_test.rs");
     }
 
     mod d2s_intrinsics_test {
+        #![allow(clippy::cast_lossless, clippy::cast_possible_truncation, clippy::unreadable_literal)]
+
         include!("../unittests/d2s_intrinsics_test.rs");
     }
 }

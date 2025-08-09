@@ -38,7 +38,7 @@ impl MeanAndVariance {
 }
 
 macro_rules! benchmark {
-    ($name:ident, $ty:ident) => {
+    ($name:ident, $ty:ident, $method:ident) => {
         fn $name() -> usize {
             let mut rng = rand_xorshift::XorShiftRng::from_seed([123u8; 16]);
             let mut mv = MeanAndVariance::new();
@@ -53,7 +53,7 @@ macro_rules! benchmark {
 
                 let t1 = std::time::SystemTime::now();
                 for _ in 0..ITERATIONS {
-                    throwaway += ryuu::Buffer::new().format_finite(f).len();
+                    throwaway += ryuu::Formatter::$method(f).len();
                 }
                 let duration = t1.elapsed().unwrap();
                 let nanos = duration.as_secs() * 1_000_000_000 + duration.subsec_nanos() as u64;
@@ -70,8 +70,8 @@ macro_rules! benchmark {
     };
 }
 
-benchmark!(pretty32, f32);
-benchmark!(pretty64, f64);
+benchmark!(pretty32, f32, format_finite_f32);
+benchmark!(pretty64, f64, format_finite_f64);
 
 fn main() {
     println!("{:>20}{:>9}", "Average", "Stddev");

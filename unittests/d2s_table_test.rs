@@ -24,13 +24,13 @@ use crate::d2s_small_table::{compute_inv_pow5, compute_pow5};
 #[test]
 fn test_compute_pow5() {
     for (i, entry) in DOUBLE_POW5_SPLIT.iter().enumerate() {
-        assert_eq!(*entry, unsafe { compute_pow5(i as u32) }, "entry {}", i);
+        assert_eq!(*entry, unsafe { compute_pow5(i as u32) }, "entry {i}");
     }
 }
 
 #[test]
 fn test_compute_inv_pow5() {
     for (i, entry) in DOUBLE_POW5_INV_SPLIT[..292].iter().enumerate() {
-        assert_eq!(*entry, unsafe { compute_inv_pow5(i as u32) }, "entry {}", i);
+        assert_eq!(*entry, unsafe { compute_inv_pow5(i as u32) }, "entry {i}");
     }
 }

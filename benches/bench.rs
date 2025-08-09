@@ -7,27 +7,27 @@ use criterion::{criterion_group, criterion_main, Criterion};
 const F64_VALUES: &[f64] = &[
     0.0,
     0.1234,
-    2.718281828459045, // e
-    3.141592653589793, // pi
+    core::f64::consts::E,
+    core::f64::consts::PI,
     1.23e40,
     1.23e-40,
     f64::MAX,
     f64::MIN,
-    123.456789,
-    -123.456789,
+    123.456_789,
+    -123.456_789,
 ];
 
 const F32_VALUES: &[f32] = &[
     0.0,
     0.1234,
-    2.718281828459045, // e
-    3.141592653589793, // pi
+    core::f32::consts::E,
+    core::f32::consts::PI,
     1.23e20,
     1.23e-20,
     f32::MAX,
     f32::MIN,
-    123.456789,
-    -123.456789,
+    123.456_79,
+    -123.456_79,
 ];
 
 fn bench_f64(c: &mut Criterion) {
@@ -44,8 +44,8 @@ fn bench_f64(c: &mut Criterion) {
 
         group.bench_function(format!("ryuu/{value}"), |b| {
             b.iter(|| {
-                let mut buf = ryuu::Buffer::new();
-                let string = buf.format(black_box(value));
+                let formatted = ryuu::Formatter::format_f64(black_box(value));
+                let string = formatted.as_str();
                 black_box(string);
             });
         });
@@ -72,8 +72,8 @@ fn bench_f32(c: &mut Criterion) {
 
         group.bench_function(format!("ryuu/{value}"), |b| {
             b.iter(|| {
-                let mut buf = ryuu::Buffer::new();
-                let string = buf.format(black_box(value));
+                let formatted = ryuu::Formatter::format_f32(black_box(value));
+                let string = formatted.as_str();
                 black_box(string);
             });
         });

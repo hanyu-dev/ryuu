@@ -1,3 +1,5 @@
+//! Unsafe API that mirror the API of the C implementation of Ryū.
+
 mod exponent;
 mod mantissa;
 
@@ -36,8 +38,8 @@ use crate::f2s::{f2d, FLOAT_EXPONENT_BITS, FLOAT_MANTISSA_BITS};
 /// ## Example
 ///
 /// ```
-/// use std::mem::MaybeUninit;
-/// use std::{slice, str};
+/// use core::mem::MaybeUninit;
+/// use core::{slice, str};
 ///
 /// let f = 1.234f64;
 ///
@@ -51,6 +53,13 @@ use crate::f2s::{f2d, FLOAT_EXPONENT_BITS, FLOAT_MANTISSA_BITS};
 /// ```
 #[must_use]
 pub const unsafe fn format64(f: f64, result: *mut u8) -> usize {
+    format64_spec(f, result).initialized
+}
+
+#[inline]
+#[must_use]
+/// See [`format64`].
+pub(crate) const unsafe fn format64_spec(f: f64, result: *mut u8) -> Formatted {
     let bits = f.to_bits();
     let sign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1) != 0;
     let ieee_mantissa = bits & ((1u64 << DOUBLE_MANTISSA_BITS) - 1);
@@ -64,7 +73,13 @@ pub const unsafe fn format64(f: f64, result: *mut u8) -> usize {
 
     if ieee_exponent == 0 && ieee_mantissa == 0 {
         ptr::copy_nonoverlapping(b"0.0".as_ptr(), result.offset(index), 3);
-        return sign as usize + 3;
+
+        return Formatted {
+            initialized: sign as usize + 3,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: sign as usize + 1,
+            },
+        };
     }
 
     let v = d2d(ieee_mantissa, ieee_exponent);
@@ -82,13 +97,25 @@ pub const unsafe fn format64(f: f64, result: *mut u8) -> usize {
         });
         *result.offset(index + kk) = b'.';
         *result.offset(index + kk + 1) = b'0';
-        index as usize + kk as usize + 2
+
+        Formatted {
+            initialized: index as usize + kk as usize + 2,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: (index + kk) as usize,
+            },
+        }
     } else if 0 < kk && kk <= 16 {
         // 1234e-2 -> 12.34
         write_mantissa_long(v.mantissa, result.offset(index + length + 1));
         ptr::copy(result.offset(index + 1), result.offset(index), kk as usize);
         *result.offset(index + kk) = b'.';
-        index as usize + length as usize + 1
+
+        Formatted {
+            initialized: index as usize + length as usize + 1,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: (index + kk) as usize,
+            },
+        }
     } else if -5 < kk && kk <= 0 {
         // 1234e-6 -> 0.001234
         *result.offset(index) = b'0';
@@ -98,19 +125,42 @@ pub const unsafe fn format64(f: f64, result: *mut u8) -> usize {
             *result.offset(index + i) = b'0';
         });
         write_mantissa_long(v.mantissa, result.offset(index + length + offset));
-        index as usize + length as usize + offset as usize
+
+        Formatted {
+            initialized: index as usize + length as usize + offset as usize,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: (index + 1) as usize,
+            },
+        }
     } else if length == 1 {
         // 1e30
         *result.offset(index) = b'0' + v.mantissa as u8;
         *result.offset(index + 1) = b'e';
-        index as usize + 2 + write_exponent3(kk - 1, result.offset(index + 2))
+
+        Formatted {
+            initialized: index as usize + 2 + write_exponent3(kk - 1, result.offset(index + 2)),
+            meta: FormattedMeta::Exponent {
+                offset_decimal_point: None,
+                offset_exponent: (index + 1) as usize,
+            },
+        }
     } else {
         // 1234e30 -> 1.234e33
         write_mantissa_long(v.mantissa, result.offset(index + length + 1));
         *result.offset(index) = *result.offset(index + 1);
         *result.offset(index + 1) = b'.';
         *result.offset(index + length + 1) = b'e';
-        index as usize + length as usize + 2 + write_exponent3(kk - 1, result.offset(index + length + 2))
+
+        Formatted {
+            initialized: index as usize
+                + length as usize
+                + 2
+                + write_exponent3(kk - 1, result.offset(index + length + 2)),
+            meta: FormattedMeta::Exponent {
+                offset_decimal_point: Some((index + 1) as usize),
+                offset_exponent: (index + length + 1) as usize,
+            },
+        }
     }
 }
 
@@ -139,8 +189,8 @@ pub const unsafe fn format64(f: f64, result: *mut u8) -> usize {
 /// ## Example
 ///
 /// ```
-/// use std::mem::MaybeUninit;
-/// use std::{slice, str};
+/// use core::mem::MaybeUninit;
+/// use core::{slice, str};
 ///
 /// let f = 1.234f32;
 ///
@@ -154,6 +204,13 @@ pub const unsafe fn format64(f: f64, result: *mut u8) -> usize {
 /// ```
 #[must_use]
 pub const unsafe fn format32(f: f32, result: *mut u8) -> usize {
+    format32_spec(f, result).initialized
+}
+
+#[inline]
+#[must_use]
+/// See [`format32`].
+pub(crate) const unsafe fn format32_spec(f: f32, result: *mut u8) -> Formatted {
     let bits = f.to_bits();
     let sign = ((bits >> (FLOAT_MANTISSA_BITS + FLOAT_EXPONENT_BITS)) & 1) != 0;
     let ieee_mantissa = bits & ((1u32 << FLOAT_MANTISSA_BITS) - 1);
@@ -167,7 +224,13 @@ pub const unsafe fn format32(f: f32, result: *mut u8) -> usize {
 
     if ieee_exponent == 0 && ieee_mantissa == 0 {
         ptr::copy_nonoverlapping(b"0.0".as_ptr(), result.offset(index), 3);
-        return sign as usize + 3;
+
+        return Formatted {
+            initialized: sign as usize + 3,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: sign as usize + 1,
+            },
+        };
     }
 
     let v = f2d(ieee_mantissa, ieee_exponent);
@@ -185,13 +248,25 @@ pub const unsafe fn format32(f: f32, result: *mut u8) -> usize {
         });
         *result.offset(index + kk) = b'.';
         *result.offset(index + kk + 1) = b'0';
-        index as usize + kk as usize + 2
+
+        Formatted {
+            initialized: index as usize + kk as usize + 2,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: (index + kk) as usize,
+            },
+        }
     } else if 0 < kk && kk <= 13 {
         // 1234e-2 -> 12.34
         write_mantissa(v.mantissa, result.offset(index + length + 1));
         ptr::copy(result.offset(index + 1), result.offset(index), kk as usize);
         *result.offset(index + kk) = b'.';
-        index as usize + length as usize + 1
+
+        Formatted {
+            initialized: index as usize + length as usize + 1,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: (index + kk) as usize,
+            },
+        }
     } else if -6 < kk && kk <= 0 {
         // 1234e-6 -> 0.001234
         *result.offset(index) = b'0';
@@ -201,18 +276,73 @@ pub const unsafe fn format32(f: f32, result: *mut u8) -> usize {
             *result.offset(index + i) = b'0';
         });
         write_mantissa(v.mantissa, result.offset(index + length + offset));
-        index as usize + length as usize + offset as usize
+
+        Formatted {
+            initialized: index as usize + length as usize + offset as usize,
+            meta: FormattedMeta::Decimal {
+                offset_decimal_point: (index + 1) as usize,
+            },
+        }
     } else if length == 1 {
         // 1e30
         *result.offset(index) = b'0' + v.mantissa as u8;
         *result.offset(index + 1) = b'e';
-        index as usize + 2 + write_exponent2(kk - 1, result.offset(index + 2))
+
+        Formatted {
+            initialized: index as usize + 2 + write_exponent2(kk - 1, result.offset(index + 2)),
+            meta: FormattedMeta::Exponent {
+                offset_decimal_point: None,
+                offset_exponent: (index + 1) as usize,
+            },
+        }
     } else {
         // 1234e30 -> 1.234e33
         write_mantissa(v.mantissa, result.offset(index + length + 1));
         *result.offset(index) = *result.offset(index + 1);
         *result.offset(index + 1) = b'.';
         *result.offset(index + length + 1) = b'e';
-        index as usize + length as usize + 2 + write_exponent2(kk - 1, result.offset(index + length + 2))
+
+        Formatted {
+            initialized: index as usize
+                + length as usize
+                + 2
+                + write_exponent2(kk - 1, result.offset(index + length + 2)),
+            meta: FormattedMeta::Exponent {
+                offset_decimal_point: Some((index + 1) as usize),
+                offset_exponent: (index + length + 1) as usize,
+            },
+        }
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+/// The formatted result.
+pub struct Formatted {
+    /// The number of bytes written to the buffer.
+    pub initialized: usize,
+
+    /// Some metadata about the formatted number.
+    pub meta: FormattedMeta,
+}
+
+#[derive(Debug, Clone, Copy)]
+/// Metadata about the formatted number.
+pub enum FormattedMeta {
+    /// The offset of the decimal point in the string representation.
+    Decimal {
+        /// The offset of the decimal point in the string representation.
+        offset_decimal_point: usize,
+    },
+
+    /// The format is in exponent form, e.g. "1.23e4".
+    Exponent {
+        /// The offset of the decimal point in the string representation.
+        offset_decimal_point: Option<usize>,
+
+        /// The offset of the exponent in the string representation.
+        offset_exponent: usize,
+    },
+
+    /// Non-finite numbers, such as NaN or infinity.
+    Nonfinite,
 }

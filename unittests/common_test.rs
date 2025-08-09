@@ -71,5 +71,5 @@ fn test_float_to_bits() {
 #[test]
 fn test_double_to_bits() {
     assert_eq!(0, 0.0_f64.to_bits());
-    assert_eq!(0x400921FB54442D18, 3.1415926535897932384626433_f64.to_bits(),);
+    assert_eq!(0x400921FB54442D18, 3.141_592_653_589_793_f64.to_bits(),);
 }

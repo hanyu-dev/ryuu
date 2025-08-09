@@ -112,9 +112,8 @@ pub const unsafe fn compute_pow5(i: u32) -> (u64, u64) {
     let b2 = m as u128 * mul.1 as u128;
     let delta = pow5bits(i as i32) - pow5bits(base2 as i32);
     debug_assert!(i / 16 < POW5_OFFSETS.len() as u32);
-    let shifted_sum = (b0 >> delta)
-        + (b2 << (64 - delta))
-        + ((POW5_OFFSETS[(i / 16) as usize] >> ((i % 16) << 1)) & 3) as u128;
+    let shifted_sum =
+        (b0 >> delta) + (b2 << (64 - delta)) + ((POW5_OFFSETS[(i / 16) as usize] >> ((i % 16) << 1)) & 3) as u128;
     (shifted_sum as u64, (shifted_sum >> 64) as u64)
 }
 
