@@ -54,7 +54,7 @@ fn test_basic() {
 
 #[test]
 fn test_min_max() {
-    assert_eq!(1.7976931348623157e308, s2d(b"1.7976931348623157e308").unwrap(),);
+    assert_eq!(1.7976931348623157e308, s2d(b"1.7976931348623157e308").unwrap());
     assert_eq!(5E-324, s2d(b"5E-324").unwrap());
 }
 

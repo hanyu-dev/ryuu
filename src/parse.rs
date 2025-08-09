@@ -1,3 +1,5 @@
+//! Experimental parsing functions.
+
 use core::fmt::{self, Display};
 
 use crate::common::{ceil_log2_pow5, log2_pow5};
@@ -44,6 +46,11 @@ impl Display for Error {
 }
 
 /// Converts `f32`'s string representation back to an `f32`.
+///
+/// ## Errors
+///
+/// This function can return an `Error` if the input is malformed, too short, or
+/// too long.
 pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
     let len = buffer.len();
     if len == 0 {
@@ -87,7 +94,7 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
         i += 1;
     }
 
-    if let Some(b'e') | Some(b'E') = buffer.get(i) {
+    if let Some(b'e' | b'E') = buffer.get(i) {
         e_index = i;
         i += 1;
         match buffer.get(i) {
@@ -256,6 +263,11 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
 }
 
 /// Converts `f64`'s string representation back to an `f64`.
+///
+/// ## Errors
+///
+/// This function can return an `Error` if the input is malformed, too short, or
+/// too long.
 pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
     let len = buffer.len();
     if len == 0 {
@@ -299,7 +311,7 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
         i += 1;
     }
 
-    if let Some(b'e') | Some(b'E') = buffer.get(i) {
+    if let Some(b'e' | b'E') = buffer.get(i) {
         e_index = i;
         i += 1;
         match buffer.get(i) {
@@ -462,11 +474,45 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
 
 #[cfg(test)]
 mod tests {
+
     mod s2f_test {
+        #![allow(dead_code)]
+        #![allow(
+            clippy::cast_lossless,
+            clippy::cast_possible_truncation,
+            clippy::cast_possible_wrap,
+            clippy::cast_sign_loss,
+            clippy::checked_conversions,
+            clippy::float_cmp,
+            clippy::manual_range_contains,
+            clippy::similar_names,
+            clippy::too_many_lines,
+            clippy::unreadable_literal,
+            clippy::unseparated_literal_suffix,
+            clippy::wildcard_imports
+        )]
+
         include!("../unittests/s2f_test.rs");
     }
 
     mod s2d_test {
+        #![cfg(not(feature = "small"))]
+        #![allow(dead_code)]
+        #![allow(
+            clippy::cast_lossless,
+            clippy::cast_possible_truncation,
+            clippy::cast_possible_wrap,
+            clippy::cast_sign_loss,
+            clippy::excessive_precision,
+            clippy::float_cmp,
+            clippy::manual_range_contains,
+            clippy::similar_names,
+            clippy::too_many_lines,
+            clippy::unreadable_literal,
+            clippy::unseparated_literal_suffix,
+            clippy::wildcard_imports
+        )]
+
         include!("../unittests/s2d_test.rs");
     }
 }

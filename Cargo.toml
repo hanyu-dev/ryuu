@@ -22,7 +22,7 @@ exclude = ["build.rs", "performance.png", "chart/**"]
 # one case, and only f64) at the cost of some performance.
 small = []
 
-# Experimental parsing function.
+# Experimental parsing functions.
 feat-exp-parse = []
 
 [dependencies]
@@ -49,6 +49,11 @@ rustdoc-args = [
 name = "bench"
 harness = false
 
-[profile.bench]
+# For release builds
+[profile.release]
+opt-level = 3
 lto = true
 codegen-units = 1
+incremental = false
+panic = "abort"
+strip = true

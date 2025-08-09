@@ -98,5 +98,14 @@ pub const fn log10_pow5(e: i32) -> u32 /* or u32 -> u32 */ {
 
 #[cfg(test)]
 mod tests {
+    #![allow(
+        clippy::approx_constant,
+        clippy::cast_possible_wrap,
+        clippy::cast_sign_loss,
+        clippy::excessive_precision,
+        clippy::unreadable_literal,
+        clippy::wildcard_imports
+    )]
+
     include!("../unittests/common_test.rs");
 }
