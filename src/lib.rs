@@ -49,13 +49,13 @@
 //! $ cargo run --example upstream_benchmark --release
 //! ```
 //!
-//! These benchmarks measure the average time to print a 32-bit float and average
-//! time to print a 64-bit float, where the inputs are distributed as uniform random
-//! bit patterns 32 and 64 bits wide.
+//! These benchmarks measure the average time to print a 32-bit float and
+//! average time to print a 64-bit float, where the inputs are distributed as
+//! uniform random bit patterns 32 and 64 bits wide.
 //!
-//! The upstream C code, the unsafe direct Rust port, and the safe pretty Rust API
-//! all perform the same, taking around 21 nanoseconds to format a 32-bit float and
-//! 31 nanoseconds to format a 64-bit float.
+//! The upstream C code, the unsafe direct Rust port, and the safe pretty Rust
+//! API all perform the same, taking around 21 nanoseconds to format a 32-bit
+//! float and 31 nanoseconds to format a 64-bit float.
 //!
 //! There is also a Rust-specific benchmark comparing this implementation to the
 //! standard library which you can run with:

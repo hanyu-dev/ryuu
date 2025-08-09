@@ -174,10 +174,7 @@ fn test_min_max_shift() {
     // 32-bit opt-size=1:  28 <= dist <= 49
     // 64-bit opt-size=0:  50 <= dist <= 50
     // 64-bit opt-size=1:  28 <= dist <= 50
-    assert_eq!(
-        2.8480945388892175E-306,
-        ieee_parts_to_double(false, 6, max_mantissa)
-    );
+    assert_eq!(2.8480945388892175E-306, ieee_parts_to_double(false, 6, max_mantissa));
     check!(2.8480945388892175e-306);
     // 32-bit opt-size=0:  52 <= dist <= 53
     // 32-bit opt-size=1:   2 <= dist <= 53
@@ -189,10 +186,7 @@ fn test_min_max_shift() {
     // 32-bit opt-size=1:   2 <= dist <= 52
     // 64-bit opt-size=0:  53 <= dist <= 53
     // 64-bit opt-size=1:   2 <= dist <= 53
-    assert_eq!(
-        4.8929891601781557E-296,
-        ieee_parts_to_double(false, 40, max_mantissa)
-    );
+    assert_eq!(4.8929891601781557E-296, ieee_parts_to_double(false, 40, max_mantissa));
     check!(4.8929891601781557e-296);
 
     // 32-bit opt-size=0:  57 <= dist <= 58
@@ -205,10 +199,7 @@ fn test_min_max_shift() {
     // 32-bit opt-size=1:  57 <= dist <= 57
     // 64-bit opt-size=0:  58 <= dist <= 58
     // 64-bit opt-size=1:  58 <= dist <= 58
-    assert_eq!(
-        3.6028797018963964E16,
-        ieee_parts_to_double(false, 1076, max_mantissa)
-    );
+    assert_eq!(3.6028797018963964E16, ieee_parts_to_double(false, 1076, max_mantissa));
     check!(3.6028797018963964e16);
     // 32-bit opt-size=0:  51 <= dist <= 52
     // 32-bit opt-size=1:  51 <= dist <= 59
@@ -220,10 +211,7 @@ fn test_min_max_shift() {
     // 32-bit opt-size=1:  51 <= dist <= 59
     // 64-bit opt-size=0:  52 <= dist <= 52
     // 64-bit opt-size=1:  52 <= dist <= 59
-    assert_eq!(
-        5.801671039719115E-216,
-        ieee_parts_to_double(false, 306, max_mantissa)
-    );
+    assert_eq!(5.801671039719115E-216, ieee_parts_to_double(false, 306, max_mantissa));
     check!(5.801671039719115e-216);
 
     // https://github.com/ulfjack/ryu/commit/19e44d16d80236f5de25800f56d82606d1be00b9#commitcomment-30146483

@@ -79,7 +79,8 @@ pub fn ceil_log2_pow5(e: i32) -> i32 /* or u32 -> u32 */ {
 // Returns floor(log_10(2^e)); requires 0 <= e <= 1650.
 #[cfg_attr(feature = "no-panic", inline)]
 pub fn log10_pow2(e: i32) -> u32 /* or u32 -> u32 */ {
-    // The first value this approximation fails for is 2^1651 which is just greater than 10^297.
+    // The first value this approximation fails for is 2^1651 which is just greater
+    // than 10^297.
     debug_assert!(e >= 0);
     debug_assert!(e <= 1650);
     (e as u32 * 78913) >> 18
@@ -88,7 +89,8 @@ pub fn log10_pow2(e: i32) -> u32 /* or u32 -> u32 */ {
 // Returns floor(log_10(5^e)); requires 0 <= e <= 2620.
 #[cfg_attr(feature = "no-panic", inline)]
 pub fn log10_pow5(e: i32) -> u32 /* or u32 -> u32 */ {
-    // The first value this approximation fails for is 5^2621 which is just greater than 10^1832.
+    // The first value this approximation fails for is 5^2621 which is just greater
+    // than 10^1832.
     debug_assert!(e >= 0);
     debug_assert!(e <= 2620);
     (e as u32 * 732923) >> 20

@@ -19,11 +19,7 @@
 // KIND, either express or implied.
 
 #![allow(dead_code)]
-#![allow(
-    clippy::cast_lossless,
-    clippy::cast_possible_truncation,
-    clippy::unreadable_literal
-)]
+#![allow(clippy::cast_lossless, clippy::cast_possible_truncation, clippy::unreadable_literal)]
 
 #[path = "../src/d2s_intrinsics.rs"]
 mod d2s_intrinsics;
@@ -68,5 +64,7 @@ fn test_pow5_factor() {
 
     assert_eq!(27, pow5_factor(7450580596923828125)); // 5^27, largest power of 5 < 2^64.
     assert_eq!(1, pow5_factor(18446744073709551615)); // 2^64 - 1, largest multiple of 5 < 2^64.
-    assert_eq!(0, pow5_factor(18446744073709551614)); // 2^64 - 2, largest non-multiple of 5 < 2^64.
+    assert_eq!(0, pow5_factor(18446744073709551614)); // 2^64 - 2, largest
+                                                      // non-multiple of 5 <
+                                                      // 2^64.
 }
