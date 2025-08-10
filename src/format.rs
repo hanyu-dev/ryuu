@@ -42,12 +42,6 @@ pub struct Formatted {
 }
 
 impl fmt::Debug for Formatted {
-    /// Prints the string representation of the last formatted floating point
-    /// number.
-    ///
-    /// # Panics
-    ///
-    /// This method panics if no floating point number has been formatted yet.
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Formatted")
@@ -55,6 +49,13 @@ impl fmt::Debug for Formatted {
             .field("meta", &self.meta)
             .field("initialized", &self.initialized)
             .finish()
+    }
+}
+
+impl fmt::Display for Formatted {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 
