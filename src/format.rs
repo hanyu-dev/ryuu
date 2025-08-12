@@ -121,17 +121,26 @@ impl Formatted {
     ///
     /// ```rust
     /// # use ryuu::Formatter;
-    /// // For a number with more decimal places than requested
-    /// let formatted = Formatter::format_finite_f64(3.14159);
+    /// #
+    /// let mut formatted = Formatter::format(3.14159_f64);
     /// assert_eq!(formatted.as_str_fixed_dp::<2>(), "3.14");
+    /// # let mut formatted = Formatter::format(-3.14159_f64);
+    /// # assert_eq!(formatted.as_str_fixed_dp::<2>(), "-3.14");
     ///
-    /// // For a number with fewer decimal places than requested
-    /// let formatted = Formatter::format_finite_f64(3.1);
-    /// assert_eq!(formatted.as_str_fixed_dp::<3>(), "3.1"); // Not padded to "3.100"
+    /// let mut formatted = Formatter::format(3.1_f64);
+    /// assert_eq!(formatted.as_str_fixed_dp::<3>(), "3.1"); // Will not padded to "3.100"
+    /// # let mut formatted = Formatter::format(-3.1_f64);
+    /// # assert_eq!(formatted.as_str_fixed_dp::<3>(), "-3.1");
     ///
-    /// // For a large number that is formatted in scientific notation form
-    /// let formatted = Formatter::format_finite_f64(1.0123e16);
-    /// assert_eq!(formatted.as_str_fixed_dp::<2>(), "1.0123e16"); // Keeps the same
+    /// let mut formatted = Formatter::format(1.0123e16_f64);
+    /// assert_eq!(formatted.as_str_fixed_dp::<2>(), "1.0123e16"); 
+    /// 
+    /// let mut formatted = Formatter::format(f64::INFINITY);
+    /// assert_eq!(formatted.as_str_fixed_dp::<2>(), "inf");
+    /// # let mut formatted = Formatter::format(f64::NEG_INFINITY);
+    /// # assert_eq!(formatted.as_str_fixed_dp::<2>(), "-inf");
+    /// # let mut formatted = Formatter::format(f64::NAN);
+    /// # assert_eq!(formatted.as_str_fixed_dp::<2>(), "NaN");
     /// ```
     pub const fn as_str_fixed_dp<const DECIMAL_PLACES: usize>(&self) -> &str {
         match self.meta {
@@ -145,6 +154,79 @@ impl Formatted {
                     }
                 } else {
                     self.as_str()
+                }
+            }
+            _ => self.as_str(),
+        }
+    }
+
+    /// Returns the formatted text with a fixed number of decimal places.
+    ///
+    /// Unlike [`as_str_fixed_dp`](Self::as_str_fixed_dp), this method adjusts
+    /// the decimal point if necessary.
+    ///
+    /// ## Constant Parameters
+    ///
+    /// * `DECIMAL_PLACES` - The number of decimal places to include in the
+    ///   output
+    ///
+    /// ## Examples
+    ///
+    /// ```rust
+    /// # use ryuu::Formatter;
+    /// #
+    /// let mut formatted = Formatter::format(3.14159_f64);
+    /// assert_eq!(formatted.as_str_adjusting_dp::<2>(), "3.14");
+    /// # let mut formatted = Formatter::format(-3.14159_f64);
+    /// # assert_eq!(formatted.as_str_adjusting_dp::<2>(), "-3.14");
+    ///
+    /// let mut formatted = Formatter::format(3.1_f64);
+    /// assert_eq!(formatted.as_str_adjusting_dp::<3>(), "3.100"); // Will padded to "3.100"
+    /// assert_eq!(formatted.as_str_fixed_dp::<3>(), "3.100"); // Ohh, we have adjusted the decimal point
+    /// # let mut formatted = Formatter::format(-3.1_f64);
+    /// # assert_eq!(formatted.as_str_adjusting_dp::<3>(), "-3.100");
+    /// # assert_eq!(formatted.as_str_fixed_dp::<3>(), "-3.100");
+    ///
+    /// let mut formatted = Formatter::format(1.0123e16_f64);
+    /// assert_eq!(formatted.as_str_adjusting_dp::<2>(), "1.0123e16"); 
+    /// 
+    /// let mut formatted = Formatter::format(f64::INFINITY);
+    /// assert_eq!(formatted.as_str_adjusting_dp::<2>(), "inf");
+    /// # let mut formatted = Formatter::format(f64::NEG_INFINITY);
+    /// # assert_eq!(formatted.as_str_adjusting_dp::<2>(), "-inf");
+    /// # let mut formatted = Formatter::format(f64::NAN);
+    /// # assert_eq!(formatted.as_str_adjusting_dp::<2>(), "NaN");
+    /// ```
+    pub const fn as_str_adjusting_dp<const DECIMAL_PLACES: usize>(&mut self) -> &str {
+        match self.meta {
+            FormattedMeta::Decimal { offset_decimal_point } => {
+                let target_length = offset_decimal_point + DECIMAL_PLACES + 1;
+
+                let to_be_zeroed = target_length.checked_sub(self.initialized);
+
+                match to_be_zeroed {
+                    None | Some(0) => unsafe {
+                        str::from_utf8_unchecked(slice::from_raw_parts(self.bytes.as_ptr().cast::<u8>(), target_length))
+                    },
+                    Some(to_be_zeroed) => {
+                        // Initialize the bytes to '0'.
+                        unsafe {
+                            self.bytes
+                                .as_mut_ptr()
+                                .add(self.initialized)
+                                .write_bytes(b'0', to_be_zeroed);
+                        };
+
+                        // Update the initialized length
+                        self.initialized = target_length;
+
+                        unsafe {
+                            str::from_utf8_unchecked(slice::from_raw_parts(
+                                self.bytes.as_ptr().cast::<u8>(),
+                                target_length,
+                            ))
+                        }
+                    }
                 }
             }
             _ => self.as_str(),
