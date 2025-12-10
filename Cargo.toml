@@ -1,6 +1,6 @@
 [package]
 name = "ryuu"
-version = "2.0.0-alpha.2"
+version = "2.0.0+ryu.86d20a5"
 edition = "2021"
 rust-version = "1.83.0"
 
