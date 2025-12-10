@@ -23,7 +23,9 @@ use core::mem::MaybeUninit;
 use crate::common::{log10_pow2, log10_pow5, pow5bits};
 #[cfg(any(test, not(feature = "small"), feature = "feat-exp-parse"))]
 pub use crate::d2s_full_table::{DOUBLE_POW5_INV_SPLIT, DOUBLE_POW5_SPLIT};
-use crate::d2s_intrinsics::{div10, div100, div5, mul_shift_all_64, multiple_of_power_of_2, multiple_of_power_of_5};
+use crate::d2s_intrinsics::{
+    div10, div100, div5, mul_shift_all_64, multiple_of_power_of_2, multiple_of_power_of_5,
+};
 #[cfg(feature = "small")]
 pub use crate::d2s_small_table::{compute_inv_pow5, compute_pow5};
 
@@ -255,7 +257,8 @@ pub const fn d2d(ieee_mantissa: u64, ieee_exponent: u32) -> FloatingDecimal64 {
             last_removed_digit = 4;
         }
         // We need to take vr + 1 if vr is outside bounds or we need to round up.
-        vr + ((vr == vm && (!accept_bounds || !vm_is_trailing_zeros)) || last_removed_digit >= 5) as u64
+        vr + ((vr == vm && (!accept_bounds || !vm_is_trailing_zeros)) || last_removed_digit >= 5)
+            as u64
     } else {
         // Specialized for the common case (~99.3%). Percentages below are relative to
         // this.
@@ -318,7 +321,11 @@ mod tests {
     }
 
     mod d2s_intrinsics_test {
-        #![allow(clippy::cast_lossless, clippy::cast_possible_truncation, clippy::unreadable_literal)]
+        #![allow(
+            clippy::cast_lossless,
+            clippy::cast_possible_truncation,
+            clippy::unreadable_literal
+        )]
 
         include!("../unittests/d2s_intrinsics_test.rs");
     }

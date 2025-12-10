@@ -5,7 +5,7 @@ mod mantissa;
 
 use core::ptr;
 
-use const_for::const_for;
+use unroll_lite::unroll;
 
 use self::exponent::{write_exponent2, write_exponent3};
 use self::mantissa::{write_mantissa, write_mantissa_long};
@@ -63,7 +63,8 @@ pub(crate) const unsafe fn format64_spec(f: f64, result: *mut u8) -> Formatted {
     let bits = f.to_bits();
     let sign = ((bits >> (DOUBLE_MANTISSA_BITS + DOUBLE_EXPONENT_BITS)) & 1) != 0;
     let ieee_mantissa = bits & ((1u64 << DOUBLE_MANTISSA_BITS) - 1);
-    let ieee_exponent = (bits >> DOUBLE_MANTISSA_BITS) as u32 & ((1u32 << DOUBLE_EXPONENT_BITS) - 1);
+    let ieee_exponent =
+        (bits >> DOUBLE_MANTISSA_BITS) as u32 & ((1u32 << DOUBLE_EXPONENT_BITS) - 1);
 
     let mut index = 0isize;
     if sign {
@@ -92,7 +93,7 @@ pub(crate) const unsafe fn format64_spec(f: f64, result: *mut u8) -> Formatted {
     if 0 <= k && kk <= 16 {
         // 1234e7 -> 12340000000.0
         write_mantissa_long(v.mantissa, result.offset(index + length));
-        const_for!(i in length..kk => {
+        unroll!(i in length..kk => {
             *result.offset(index + i) = b'0';
         });
         *result.offset(index + kk) = b'.';
@@ -121,7 +122,7 @@ pub(crate) const unsafe fn format64_spec(f: f64, result: *mut u8) -> Formatted {
         *result.offset(index) = b'0';
         *result.offset(index + 1) = b'.';
         let offset = 2 - kk;
-        const_for!(i in 2..offset => {
+        unroll!(i in 2..offset => {
             *result.offset(index + i) = b'0';
         });
         write_mantissa_long(v.mantissa, result.offset(index + length + offset));
@@ -243,7 +244,7 @@ pub(crate) const unsafe fn format32_spec(f: f32, result: *mut u8) -> Formatted {
     if 0 <= k && kk <= 13 {
         // 1234e7 -> 12340000000.0
         write_mantissa(v.mantissa, result.offset(index + length));
-        const_for!(i in length..kk => {
+        unroll!(i in length..kk => {
             *result.offset(index + i) = b'0';
         });
         *result.offset(index + kk) = b'.';
@@ -272,7 +273,7 @@ pub(crate) const unsafe fn format32_spec(f: f32, result: *mut u8) -> Formatted {
         *result.offset(index) = b'0';
         *result.offset(index + 1) = b'.';
         let offset = 2 - kk;
-        const_for!(i in 2..offset => {
+        unroll!(i in 2..offset => {
             *result.offset(index + i) = b'0';
         });
         write_mantissa(v.mantissa, result.offset(index + length + offset));
