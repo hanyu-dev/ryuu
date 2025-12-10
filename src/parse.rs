@@ -186,7 +186,8 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
         // requires that the largest power of 2 that divides m10 + e10 is
         // greater than e2. If e2 is less than e10, then the result must be
         // exact. Otherwise we use the existing multiple_of_power_of_2 function.
-        trailing_zeros = e2 < e10 || e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32);
+        trailing_zeros =
+            e2 < e10 || e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32);
     } else {
         e2 = floor_log2_f(m10)
             .wrapping_add(e10 as u32)
@@ -212,7 +213,8 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
         // 5^(-e10)] above, and we need to check whether 5^(-e10) divides (m10 *
         // 2^(e10-e2)), which is the case iff pow5(m10 * 2^(e10-e2)) = pow5(m10)
         // >= -e10.
-        trailing_zeros = (e2 < e10 || (e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32)))
+        trailing_zeros = (e2 < e10
+            || (e2 - e10 < 32 && multiple_of_power_of_2_32(m10, (e2 - e10) as u32)))
             && multiple_of_power_of_5_32(m10, -e10 as u32);
     }
 
@@ -258,7 +260,9 @@ pub fn s2f(buffer: &[u8]) -> Result<f32, Error> {
         // for overflow here.
         ieee_e2 += 1;
     }
-    let ieee = ((((signed_m as u32) << f2s::FLOAT_EXPONENT_BITS) | ieee_e2) << f2s::FLOAT_MANTISSA_BITS) | ieee_m2;
+    let ieee = ((((signed_m as u32) << f2s::FLOAT_EXPONENT_BITS) | ieee_e2)
+        << f2s::FLOAT_MANTISSA_BITS)
+        | ieee_m2;
     Ok(f32::from_bits(ieee))
 }
 
@@ -408,7 +412,8 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
         // requires that the largest power of 2 that divides m10 + e10 is
         // greater than e2. If e2 is less than e10, then the result must be
         // exact. Otherwise we use the existing multiple_of_power_of_2 function.
-        trailing_zeros = e2 < e10 || e2 - e10 < 64 && multiple_of_power_of_2(m10, (e2 - e10) as u32);
+        trailing_zeros =
+            e2 < e10 || e2 - e10 < 64 && multiple_of_power_of_2(m10, (e2 - e10) as u32);
     } else {
         e2 = floor_log2_d(m10)
             .wrapping_add(e10 as u32)
@@ -429,7 +434,10 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
     }
 
     // Compute the final IEEE exponent.
-    let mut ieee_e2 = i32::max(0, e2 + DOUBLE_EXPONENT_BIAS as i32 + floor_log2_d(m2) as i32) as u32;
+    let mut ieee_e2 = i32::max(
+        0,
+        e2 + DOUBLE_EXPONENT_BIAS as i32 + floor_log2_d(m2) as i32,
+    ) as u32;
 
     if ieee_e2 > 0x7fe {
         // Final IEEE exponent is larger than the maximum representable; return
@@ -467,8 +475,9 @@ pub fn s2d(buffer: &[u8]) -> Result<f64, Error> {
         // for overflow here.
         ieee_e2 += 1;
     }
-    let ieee =
-        ((((signed_m as u64) << d2s::DOUBLE_EXPONENT_BITS) | ieee_e2 as u64) << d2s::DOUBLE_MANTISSA_BITS) | ieee_m2;
+    let ieee = ((((signed_m as u64) << d2s::DOUBLE_EXPONENT_BITS) | ieee_e2 as u64)
+        << d2s::DOUBLE_MANTISSA_BITS)
+        | ieee_m2;
     Ok(f64::from_bits(ieee))
 }
 

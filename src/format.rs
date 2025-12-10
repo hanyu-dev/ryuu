@@ -133,8 +133,8 @@ impl Formatted {
     /// # assert_eq!(formatted.as_str_fixed_dp::<3>(), "-3.1");
     ///
     /// let mut formatted = Formatter::format(1.0123e16_f64);
-    /// assert_eq!(formatted.as_str_fixed_dp::<2>(), "1.0123e16"); 
-    /// 
+    /// assert_eq!(formatted.as_str_fixed_dp::<2>(), "1.0123e16");
+    ///
     /// let mut formatted = Formatter::format(f64::INFINITY);
     /// assert_eq!(formatted.as_str_fixed_dp::<2>(), "inf");
     /// # let mut formatted = Formatter::format(f64::NEG_INFINITY);
@@ -144,12 +144,15 @@ impl Formatted {
     /// ```
     pub const fn as_str_fixed_dp<const DECIMAL_PLACES: usize>(&self) -> &str {
         match self.meta {
-            FormattedMeta::Decimal { offset_decimal_point } => {
+            FormattedMeta::Decimal {
+                offset_decimal_point,
+            } => {
                 let target_length = offset_decimal_point + DECIMAL_PLACES + 1;
 
                 if offset_decimal_point + DECIMAL_PLACES < self.initialized {
                     unsafe {
-                        let bytes = slice::from_raw_parts(self.bytes.as_ptr().cast::<u8>(), target_length);
+                        let bytes =
+                            slice::from_raw_parts(self.bytes.as_ptr().cast::<u8>(), target_length);
                         str::from_utf8_unchecked(bytes)
                     }
                 } else {
@@ -188,8 +191,8 @@ impl Formatted {
     /// # assert_eq!(formatted.as_str_fixed_dp::<3>(), "-3.100");
     ///
     /// let mut formatted = Formatter::format(1.0123e16_f64);
-    /// assert_eq!(formatted.as_str_adjusting_dp::<2>(), "1.0123e16"); 
-    /// 
+    /// assert_eq!(formatted.as_str_adjusting_dp::<2>(), "1.0123e16");
+    ///
     /// let mut formatted = Formatter::format(f64::INFINITY);
     /// assert_eq!(formatted.as_str_adjusting_dp::<2>(), "inf");
     /// # let mut formatted = Formatter::format(f64::NEG_INFINITY);
@@ -199,14 +202,19 @@ impl Formatted {
     /// ```
     pub const fn as_str_adjusting_dp<const DECIMAL_PLACES: usize>(&mut self) -> &str {
         match self.meta {
-            FormattedMeta::Decimal { offset_decimal_point } => {
+            FormattedMeta::Decimal {
+                offset_decimal_point,
+            } => {
                 let target_length = offset_decimal_point + DECIMAL_PLACES + 1;
 
                 let to_be_zeroed = target_length.checked_sub(self.initialized);
 
                 match to_be_zeroed {
                     None | Some(0) => unsafe {
-                        str::from_utf8_unchecked(slice::from_raw_parts(self.bytes.as_ptr().cast::<u8>(), target_length))
+                        str::from_utf8_unchecked(slice::from_raw_parts(
+                            self.bytes.as_ptr().cast::<u8>(),
+                            target_length,
+                        ))
                     },
                     Some(to_be_zeroed) => {
                         // Initialize the bytes to '0'.
@@ -330,9 +338,14 @@ impl Formatted {
     /// # let written = formatted.copy_to_bytes::<2>(&mut buf).unwrap();
     /// # assert_eq!(&buf[..written], b"-inf");
     /// ```
-    pub const fn copy_to_bytes<const DECIMAL_PLACES: usize>(&self, buf: &mut [u8]) -> Option<usize> {
+    pub const fn copy_to_bytes<const DECIMAL_PLACES: usize>(
+        &self,
+        buf: &mut [u8],
+    ) -> Option<usize> {
         match self.meta {
-            FormattedMeta::Decimal { offset_decimal_point } => {
+            FormattedMeta::Decimal {
+                offset_decimal_point,
+            } => {
                 if DECIMAL_PLACES == 0 {
                     let Some((buf, _)) = buf.split_at_mut_checked(offset_decimal_point) else {
                         return None;
@@ -356,7 +369,11 @@ impl Formatted {
 
                     unsafe {
                         if target_length <= self.initialized {
-                            ptr::copy_nonoverlapping(self.bytes.as_ptr().cast::<u8>(), buf.as_mut_ptr(), target_length);
+                            ptr::copy_nonoverlapping(
+                                self.bytes.as_ptr().cast::<u8>(),
+                                buf.as_mut_ptr(),
+                                target_length,
+                            );
                         } else {
                             // SAFETY: target_length > self.initialized
                             let (bytes, zeros) = buf.split_at_mut_unchecked(self.initialized);
@@ -378,10 +395,17 @@ impl Formatted {
                 offset_decimal_point,
                 offset_exponent,
             } => {
-                let target_decimal_part = if DECIMAL_PLACES == 0 { 0 } else { DECIMAL_PLACES + 1 };
+                let target_decimal_part = if DECIMAL_PLACES == 0 {
+                    0
+                } else {
+                    DECIMAL_PLACES + 1
+                };
 
                 let (actual_integer_part, actual_decimal_part) = match offset_decimal_point {
-                    Some(offset_decimal_point) => (offset_decimal_point, (offset_exponent - offset_decimal_point)),
+                    Some(offset_decimal_point) => (
+                        offset_decimal_point,
+                        (offset_exponent - offset_decimal_point),
+                    ),
                     None => (offset_exponent, 0),
                 };
 
@@ -393,7 +417,8 @@ impl Formatted {
 
                 let (bytes_integer_part, bytes_decimal_part, bytes_exponent_part) = {
                     let bytes = self.as_bytes();
-                    let (bytes_integer_part, bytes) = unsafe { bytes.split_at_unchecked(actual_integer_part) };
+                    let (bytes_integer_part, bytes) =
+                        unsafe { bytes.split_at_unchecked(actual_integer_part) };
                     let (bytes_decimal_part, bytes_exponent_part) =
                         unsafe { bytes.split_at_unchecked(actual_decimal_part) };
 
@@ -401,7 +426,8 @@ impl Formatted {
                 };
 
                 // The integer part
-                let (buf_integer_part, buf) = unsafe { buf.split_at_mut_unchecked(bytes_integer_part.len()) };
+                let (buf_integer_part, buf) =
+                    unsafe { buf.split_at_mut_unchecked(bytes_integer_part.len()) };
                 unsafe {
                     ptr::copy_nonoverlapping(
                         bytes_integer_part.as_ptr().cast::<u8>(),
@@ -411,19 +437,25 @@ impl Formatted {
                 };
 
                 // The decimal part
-                let (buf_decimal_part, buf_exponent_part) = unsafe { buf.split_at_mut_unchecked(target_decimal_part) };
+                let (buf_decimal_part, buf_exponent_part) =
+                    unsafe { buf.split_at_mut_unchecked(target_decimal_part) };
                 if target_decimal_part > 0 {
                     match target_decimal_part.checked_sub(actual_decimal_part) {
                         Some(remaining) => {
                             unsafe {
                                 if actual_decimal_part == 0 {
-                                    // If there is no decimal part, we need to write the decimal point
+                                    // If there is no decimal part, we need to write the decimal
+                                    // point
                                     buf_decimal_part.as_mut_ptr().write(b'.');
-                                    // Write zeros after the decimal point. Since we already wrote the decimal
+                                    // Write zeros after the decimal point. Since we already wrote
+                                    // the decimal
                                     // point, we need to subtract 1 from
                                     // remaining to account for the decimal point.
                                     if remaining > 0 {
-                                        buf_decimal_part.as_mut_ptr().offset(1).write_bytes(b'0', remaining - 1);
+                                        buf_decimal_part
+                                            .as_mut_ptr()
+                                            .offset(1)
+                                            .write_bytes(b'0', remaining - 1);
                                     }
                                 } else {
                                     ptr::copy_nonoverlapping(

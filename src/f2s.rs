@@ -82,7 +82,8 @@ pub const fn f2d(ieee_mantissa: u32, ieee_exponent: u32) -> FloatingDecimal32 {
             // the result, and we've found that 32-bit arithmetic is faster even
             // on 64-bit machines.
             let l = FLOAT_POW5_INV_BITCOUNT + pow5bits(q as i32 - 1) - 1;
-            last_removed_digit = (mul_pow5_inv_div_pow2(mv, q - 1, -e2 + q as i32 - 1 + l) % 10) as u8;
+            last_removed_digit =
+                (mul_pow5_inv_div_pow2(mv, q - 1, -e2 + q as i32 - 1 + l) % 10) as u8;
         }
         if q <= 9 {
             // The largest power of 5 that fits in 24 bits is 5^10, but q <= 9 seems to be
@@ -154,7 +155,8 @@ pub const fn f2d(ieee_mantissa: u32, ieee_exponent: u32) -> FloatingDecimal32 {
             last_removed_digit = 4;
         }
         // We need to take vr + 1 if vr is outside bounds or we need to round up.
-        vr + ((vr == vm && (!accept_bounds || !vm_is_trailing_zeros)) || last_removed_digit >= 5) as u32
+        vr + ((vr == vm && (!accept_bounds || !vm_is_trailing_zeros)) || last_removed_digit >= 5)
+            as u32
     } else {
         // Specialized for the common case (~96.0%). Percentages below are relative to
         // this. Loop iterations below (approximately):
