@@ -454,7 +454,7 @@ impl Formatted {
                                     if remaining > 0 {
                                         buf_decimal_part
                                             .as_mut_ptr()
-                                            .offset(1)
+                                            .add(1)
                                             .write_bytes(b'0', remaining - 1);
                                     }
                                 } else {

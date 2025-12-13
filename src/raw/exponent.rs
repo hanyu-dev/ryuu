@@ -15,11 +15,11 @@ pub const unsafe fn write_exponent3(mut k: isize, mut result: *mut u8) -> usize 
     if k >= 100 {
         *result = b'0' + (k / 100) as u8;
         k %= 100;
-        let d = DIGIT_TABLE.as_ptr().offset(k * 2);
+        let d = DIGIT_TABLE.as_ptr().add((k * 2) as usize);
         ptr::copy_nonoverlapping(d, result.add(1), 2);
         sign as usize + 3
     } else if k >= 10 {
-        let d = DIGIT_TABLE.as_ptr().offset(k * 2);
+        let d = DIGIT_TABLE.as_ptr().add((k * 2) as usize);
         ptr::copy_nonoverlapping(d, result, 2);
         sign as usize + 2
     } else {
